@@ -80,11 +80,6 @@ def elevation_points_to_xyz(min_long=-113.36, min_lat=36.0, max_long=-113.13, ma
     mean_y = math.floor(max(ys) / min(ys))
     min_z = math.floor(min(zs))
 
-    # min_x = min(xs)
-    # max_x = max(xs)
-    # min_y = min(ys)
-    # max_y = max(ys)
-
     data.append([min(xs) - 10, min(ys) - 10, min_z - 1])
     data.append([min(xs) - 10, max(ys) + 10, min_z - 1])
     data.append([max(xs) + 10, min(ys) - 10, min_z - 1])
@@ -99,19 +94,11 @@ def write_points_to_obj():
     os.remove("model.obj")
     f = open("model.obj", 'a')
 
-    minlong=-80
+    minlong=-79.75
     minlat=37.5
-    maxlong=-79.5
+    maxlong=-79.25
     maxlat=38
     resolution=90
-
-    resolution_in_deg = resolution / m_per_deg_lat
-
-    long_range = maxlong - minlong
-    lat_range = maxlat - minlat
-
-    width = round(long_range / resolution_in_deg)
-    height = round(lat_range / resolution_in_deg)
 
     fetch_elevation_data(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
     long_lat_data = elevation_points_to_xyz(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
@@ -122,8 +109,6 @@ def write_points_to_obj():
     long_lat_minus_elevation = np.array(list(map(lambda x: [x[0], x[1]], long_lat_data)))
 
     delauny = Delaunay(long_lat_minus_elevation)
-
-    limit = width*height
 
     a = len(long_lat_data) - 1
     b = len(long_lat_data) - 2
