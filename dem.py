@@ -66,7 +66,7 @@ def elevation_points_to_xyz(min_long=-113.36, min_lat=36.0, max_long=-113.13, ma
     for i in range(0, len(elevation_data)):
         for j in range(0, len(elevation_data[0])):
             long = min_long + resolution_in_deg * j
-            lat = min_lat + resolution_in_deg * i
+            lat = max_lat - resolution_in_deg * i
             (x, y, _, _) = utm.from_latlon(lat, long)
             z = elevation_data[i][j]
             element = [x, y, z]
