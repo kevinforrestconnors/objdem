@@ -9,7 +9,7 @@ PyDEM uses elevation and landsat data from `https://data.worldwind.arc.nasa.gov`
 
 ## Usage
 
-First, install the dependencies in requirements.txt, `numpy`, `scipy` and `utm`.  
+First, install the dependencies in requirements.txt, `numpy`, `scipy` and `utm`:
 
 `pip install -r requirements.txt`
 
