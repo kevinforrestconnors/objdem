@@ -12,14 +12,8 @@ worldwind = 'https://data.worldwind.arc.nasa.gov'
 elevation_data = []
 m_per_deg_lat = 111619
 
-minlong = -79.75
-minlat = 37.5
-maxlong = -79.25
-maxlat = 38
-resolution = 90
 
-def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
-
+def fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution):
     if (resolution < 30):
         resolution = 30
 
@@ -42,7 +36,8 @@ def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_l
                                  '&width=' + str(width) +
                                  '&height=' + str(height) +
                                  '&bgcolor=0xFFFFFF'
-                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(max_lat) +
+                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(
+        max_lat) +
                                  '&styles='
                                  '&version=1.3.0')
 
@@ -63,11 +58,12 @@ def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_l
             start = height * x
             row.append(b[start + y])
         elevation_data.append(row)
+
+
 # end function
 
 
-def fetch_image_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
-    
+def fetch_image_data(min_long, min_lat, max_long, max_lat, resolution):
     if (resolution < 30):
         resolution = 30
 
@@ -95,16 +91,17 @@ def fetch_image_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=3
                                  '&width=' + str(width) +
                                  '&height=' + str(height) +
                                  '&bgcolor=0xFFFFFF'
-                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(max_lat) +
+                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(
+        max_lat) +
                                  '&styles='
                                  '&version=1.3.0')
 
-    f = open('data.tiff', 'wb')
+    f = open('map.tiff', 'wb')
     bytes_written = f.write(res.read())
     f.close()
 
-def elevation_points_to_xyz(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
 
+def elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution):
     resolution_in_deg = resolution / m_per_deg_lat
 
     data = []
@@ -132,17 +129,20 @@ def elevation_points_to_xyz(min_long=-113.36, min_lat=36.0, max_long=-113.13, ma
     data.append([max(xs) + 10, max(ys) + 10, min_z - 1])
 
     return list(map(lambda e: [e[0] - mean_x, e[1] - mean_y, e[2] - min_z], data))
+
+
 # end function
 
+# precondition: fetch_elevation_data has been called
+def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
 
-def write_points_to_obj():
+    try:
+        os.remove("dem.obj")
+        f = open("dem.obj", 'a')
+    except FileNotFoundError:
+        f = open("dem.obj", 'a')
 
-    os.remove("model.obj")
-    f = open("model.obj", 'a')
-
-    fetch_elevation_data(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
-
-    points = elevation_points_to_xyz(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
+    points = elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution)
 
     for point in points:
         f.write("v " + str(point[0]) + " " + str(point[1]) + " " + str(point[2]) + '\n')
@@ -159,22 +159,46 @@ def write_points_to_obj():
     for simplex in delauny.simplices:
         # don't compute for (0,0) or (width,height)
         if (simplex[0] != a and
-            simplex[1] != a and
-            simplex[2] != a and
-            simplex[0] != b and
-            simplex[1] != b and
-            simplex[2] != b and
-            simplex[0] != c and
-            simplex[1] != c and
-            simplex[2] != c and
-            simplex[0] != d and
-            simplex[1] != d and
-            simplex[2] != d):
+                    simplex[1] != a and
+                    simplex[2] != a and
+                    simplex[0] != b and
+                    simplex[1] != b and
+                    simplex[2] != b and
+                    simplex[0] != c and
+                    simplex[1] != c and
+                    simplex[2] != c and
+                    simplex[0] != d and
+                    simplex[1] != d and
+                    simplex[2] != d):
             f.write("f " + str(simplex[0] + 1) + " " + str(simplex[1] + 1) + " " + str(simplex[2] + 1) + '\n')
 
     f.close()
+
+
 # end function
 
-#write_points_to_obj()
+def main():
+    if len(sys.argv) == 2 and sys.argv[1] == 'default':
+        min_long = -79.65
+        min_lat = 37.6
+        max_long = -79.35
+        max_lat = 37.9
+        resolution = 90
+    elif len(sys.argv) != 6:
+        print("Invalid number of arguments.  Usage: python3 dem.py min_long min_lat max_long max_lat resolution")
+        return
+    else:
+        min_long = float(sys.argv[1])
+        min_lat = float(sys.argv[2])
+        max_long = float(sys.argv[3])
+        max_lat = float(sys.argv[4])
+        resolution = float(sys.argv[5])
 
-fetch_image_data(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=30)
+    fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution)
+    fetch_image_data(min_long, min_lat, max_long, max_lat, 30)
+    write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution)
+
+    os.remove("data.bil")
+
+
+main()
