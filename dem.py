@@ -7,8 +7,16 @@ import numpy as np
 from scipy.spatial import Delaunay
 import utm
 
+worldwind = 'https://data.worldwind.arc.nasa.gov'
+
 elevation_data = []
 m_per_deg_lat = 111619
+
+minlong = -79.75
+minlat = 37.5
+maxlong = -79.25
+maxlat = 38
+resolution = 90
 
 def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
 
@@ -23,7 +31,8 @@ def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_l
     width = round(long_range / resolution_in_deg)
     height = round(lat_range / resolution_in_deg)
 
-    res = urllib.request.urlopen('https://data.worldwind.arc.nasa.gov/elev?'
+    res = urllib.request.urlopen(worldwind +
+                                 '/elev?'
                                  'service=WMS'
                                  '&request=GetMap'
                                  '&layers=NED'
@@ -56,6 +65,43 @@ def fetch_elevation_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_l
         elevation_data.append(row)
 # end function
 
+
+def fetch_image_data(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
+    
+    if (resolution < 30):
+        resolution = 30
+
+    if min_lat < -60.0 or max_lat > 84.0:
+        print("Landsat data is not available for values of latitude outside of the range -60.0 to 84.0")
+        # TODO find a database to serve this data
+        return
+
+    resolution_in_deg = resolution / m_per_deg_lat
+
+    long_range = max_long - min_long
+    lat_range = max_lat - min_lat
+
+    width = round(long_range / resolution_in_deg)
+    height = round(lat_range / resolution_in_deg)
+
+    res = urllib.request.urlopen(worldwind +
+                                 '/landsat?'
+                                 'service=WMS'
+                                 '&request=GetMap'
+                                 '&layers=esat'
+                                 '&crs=EPSG:4326'
+                                 '&format=image/tiff'
+                                 '&transparent=FALSE'
+                                 '&width=' + str(width) +
+                                 '&height=' + str(height) +
+                                 '&bgcolor=0xFFFFFF'
+                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(max_lat) +
+                                 '&styles='
+                                 '&version=1.3.0')
+
+    f = open('data.tiff', 'wb')
+    bytes_written = f.write(res.read())
+    f.close()
 
 def elevation_points_to_xyz(min_long=-113.36, min_lat=36.0, max_long=-113.13, max_lat=36.23, resolution=30):
 
@@ -94,26 +140,21 @@ def write_points_to_obj():
     os.remove("model.obj")
     f = open("model.obj", 'a')
 
-    minlong=-79.75
-    minlat=37.5
-    maxlong=-79.25
-    maxlat=38
-    resolution=90
-
     fetch_elevation_data(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
-    long_lat_data = elevation_points_to_xyz(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
 
-    for point in long_lat_data:
+    points = elevation_points_to_xyz(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=resolution)
+
+    for point in points:
         f.write("v " + str(point[0]) + " " + str(point[1]) + " " + str(point[2]) + '\n')
 
-    long_lat_minus_elevation = np.array(list(map(lambda x: [x[0], x[1]], long_lat_data)))
+    xy_points = np.array(list(map(lambda x: [x[0], x[1]], points)))
 
-    delauny = Delaunay(long_lat_minus_elevation)
+    delauny = Delaunay(xy_points)
 
-    a = len(long_lat_data) - 1
-    b = len(long_lat_data) - 2
-    c = len(long_lat_data) - 3
-    d = len(long_lat_data) - 4
+    a = len(points) - 1
+    b = len(points) - 2
+    c = len(points) - 3
+    d = len(points) - 4
 
     for simplex in delauny.simplices:
         # don't compute for (0,0) or (width,height)
@@ -134,4 +175,6 @@ def write_points_to_obj():
     f.close()
 # end function
 
-write_points_to_obj()
+#write_points_to_obj()
+
+fetch_image_data(min_long=minlong, min_lat=minlat, max_long=maxlong, max_lat=maxlat, resolution=30)
