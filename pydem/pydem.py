@@ -185,7 +185,7 @@ def main():
         max_lat = 37.9
         resolution = 90
     elif len(sys.argv) != 6:
-        print("Invalid number of arguments.  Usage: python3 dem.py min_long min_lat max_long max_lat resolution")
+        print("Invalid number of arguments.  Usage: python pydem.py min_long min_lat max_long max_lat resolution")
         return
     else:
         min_long = float(sys.argv[1])
