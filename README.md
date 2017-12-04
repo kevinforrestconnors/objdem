@@ -1,21 +1,17 @@
-# pydem
+# objDEM
 
-PyDEM is a command-line tool that creates digital elevation model .obj files from specified long-lat coordinates.
-PyDEM also creates an associated .tiff file to be used as a texture.
+objDEM is a command-line tool that creates digital elevation model .obj files from specified long-lat coordinates.
+objDEM also creates an associated .tiff file to be used as a texture.
 
-Currently, no .mtl file is created.  In the future, this is planned.
+Currently, no `.mtl` file is created.  In the future, this is planned.
 
-PyDEM uses elevation and landsat data from `https://data.worldwind.arc.nasa.gov`.
+objDEM uses elevation and landsat data from `https://data.worldwind.arc.nasa.gov`.
 
 ## Usage
 
-First, install the dependencies in requirements.txt, `numpy`, `scipy` and `utm`:
+`objdem <MIN_LONG> <MIN_LAT> <MAX_LONG> <MAX_LAT> <RESOLUTION>` or just `objdem default` for a demo example.
 
-`pip install -r requirements.txt`
-
-Then run **python3** on `pydem.py` with the arguments:
-
-`python pydem.py <MIN_LONG> <MIN_LAT> <MAX_LONG> <MAX_LAT> <RESOLUTION>` or just `python dem.py default` for a demo example.
+**Important:** files called `dem.obj` and `map.tiff` will be created in your current directory.  This may override existing files with the same name.
 
 ## Troubleshooting
 

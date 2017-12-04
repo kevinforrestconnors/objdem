@@ -201,6 +201,3 @@ def main():
     write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution)
 
     os.remove("data.bil")
-
-
-main()
