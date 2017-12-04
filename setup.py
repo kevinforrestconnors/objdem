@@ -9,5 +9,6 @@ setup(
     author_email='kevinforrestconnors.com@gmail.com',
     url="https://github.com/kevinforrestconnors/pydem",
     packages=['pydem'],
-    install_requires=['numpy', 'scipy', 'utm']
+    install_requires=['numpy', 'scipy', 'utm'],
+    scripts=['bin/pydem']
 )
