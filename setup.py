@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='objDEM',
-    version='1.0.8',
+    version='1.0.9',
     description='Generates an .obj file representing a digital elevation map from coordinate input',
     license="MIT",
     author='Kevin Forrest Connors',

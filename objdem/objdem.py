@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 
-import sys
-import os
-import array
-import urllib
-import math
-import numpy as np
-from scipy.spatial import Delaunay
-import utm
+import sys, os, array, numpy, math, utm
 
+from scipy.spatial import Delaunay
+
+# this allows python 2.7 and 3.6 to both handle urlopen
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen
+
+# this is in place so that FileNotFoundError is defined, IOError is there in case other systems have this error
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
+# the database
 worldwind = 'https://data.worldwind.arc.nasa.gov'
 
 elevation_data = []
-m_per_deg_lat = 111619
+m_per_deg_lat = 111619.0
 
 
 def fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution):
@@ -24,24 +32,23 @@ def fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution):
     long_range = max_long - min_long
     lat_range = max_lat - min_lat
 
-    width = round(long_range / resolution_in_deg)
-    height = round(lat_range / resolution_in_deg)
+    width = int(round(long_range / resolution_in_deg))
+    height = int(round(lat_range / resolution_in_deg))
 
-    res = urllib.urlopen(worldwind +
-                                 '/elev?'
-                                 'service=WMS'
-                                 '&request=GetMap'
-                                 '&layers=NED'
-                                 '&crs=EPSG:4326'
-                                 '&format=image/bil'
-                                 '&transparent=FALSE'
-                                 '&width=' + str(width) +
-                                 '&height=' + str(height) +
-                                 '&bgcolor=0xFFFFFF'
-                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(
-        max_lat) +
-                                 '&styles='
-                                 '&version=1.3.0')
+    res = urlopen(worldwind +
+                 '/elev?'
+                 'service=WMS'
+                 '&request=GetMap'
+                 '&layers=NED'
+                 '&crs=EPSG:4326'
+                 '&format=image/bil'
+                 '&transparent=FALSE'
+                 '&width=' + str(width) +
+                 '&height=' + str(height) +
+                 '&bgcolor=0xFFFFFF'
+                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(max_lat) +
+                 '&styles='
+                 '&version=1.3.0')
 
     f = open('data.bil', 'wb')
     bytes_written = f.write(res.read())
@@ -82,21 +89,20 @@ def fetch_image_data(min_long, min_lat, max_long, max_lat, resolution):
     width = round(long_range / resolution_in_deg)
     height = round(lat_range / resolution_in_deg)
 
-    res = urllib.request.urlopen(worldwind +
-                                 '/landsat?'
-                                 'service=WMS'
-                                 '&request=GetMap'
-                                 '&layers=esat'
-                                 '&crs=EPSG:4326'
-                                 '&format=image/tiff'
-                                 '&transparent=FALSE'
-                                 '&width=' + str(width) +
-                                 '&height=' + str(height) +
-                                 '&bgcolor=0xFFFFFF'
-                                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(
-        max_lat) +
-                                 '&styles='
-                                 '&version=1.3.0')
+    res = urlopen(worldwind +
+                 '/landsat?'
+                 'service=WMS'
+                 '&request=GetMap'
+                 '&layers=esat'
+                 '&crs=EPSG:4326'
+                 '&format=image/tiff'
+                 '&transparent=FALSE'
+                 '&width=' + str(width) +
+                 '&height=' + str(height) +
+                 '&bgcolor=0xFFFFFF'
+                 '&bbox=' + str(min_long) + ',' + str(min_lat) + ',' + str(max_long) + ',' + str(max_lat) +
+                 '&styles='
+                 '&version=1.3.0')
 
     f = open('map.tiff', 'wb')
     bytes_written = f.write(res.read())
@@ -141,7 +147,7 @@ def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
     try:
         os.remove("dem.obj")
         f = open("dem.obj", 'a')
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError) as e:
         f = open("dem.obj", 'a')
 
     points = elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution)
@@ -149,7 +155,7 @@ def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
     for point in points:
         f.write("v " + str(point[0]) + " " + str(point[1]) + " " + str(point[2]) + '\n')
 
-    xy_points = np.array(list(map(lambda x: [x[0], x[1]], points)))
+    xy_points = numpy.array(list(map(lambda x: [x[0], x[1]], points)))
 
     delauny = Delaunay(xy_points)
 
