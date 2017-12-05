@@ -120,15 +120,15 @@ def elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution):
             lat = max_lat - resolution_in_deg * i
             (x, y, _zone_num, _zone_letter) = utm.from_latlon(lat, long)
             z = elevation_data[i][j]
-            element = [x, y, z]
+            element = [round(x), round(y), z]
             data.append(element)
 
     xs = list(map(lambda e: e[0], data))
     ys = list(map(lambda e: e[1], data))
     zs = list(map(lambda e: e[2], data))
 
-    mean_x = math.floor(max(xs) / min(xs))
-    mean_y = math.floor(max(ys) / min(ys))
+    mean_x = math.floor((min(xs) + max(xs)) / 2)
+    mean_y = math.floor((min(ys) + max(ys)) / 2)
     min_z = math.floor(min(zs))
 
     data.append([min(xs) - 10, min(ys) - 10, min_z - 1])
@@ -207,3 +207,6 @@ def main():
     write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution)
 
     os.remove("data.bil")
+
+
+main()
