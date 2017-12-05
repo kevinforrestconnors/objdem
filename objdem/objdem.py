@@ -3,7 +3,7 @@
 import sys
 import os
 import array
-import urllib.request
+import urllib
 import math
 import numpy as np
 from scipy.spatial import Delaunay
@@ -27,7 +27,7 @@ def fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution):
     width = round(long_range / resolution_in_deg)
     height = round(lat_range / resolution_in_deg)
 
-    res = urllib.request.urlopen(worldwind +
+    res = urllib.urlopen(worldwind +
                                  '/elev?'
                                  'service=WMS'
                                  '&request=GetMap'
@@ -187,7 +187,7 @@ def main():
         max_lat = 37.9
         resolution = 90
     elif len(sys.argv) != 6:
-        print("Invalid number of arguments.  Usage: python objdem.py min_long min_lat max_long max_lat resolution")
+        print("Invalid number of arguments.  Usage: python objDEM.py min_long min_lat max_long max_lat resolution")
         return
     else:
         min_long = float(sys.argv[1])
