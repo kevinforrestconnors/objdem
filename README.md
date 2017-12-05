@@ -7,6 +7,12 @@ Currently, no `.mtl` file is created.  In the future, this is planned.
 
 objDEM uses elevation and landsat data from `https://data.worldwind.arc.nasa.gov`.
 
+## Installation
+
+`pip install objdem`
+
+This may require administrative privileges.
+
 ## Usage
 
 `objdem <MIN_LONG> <MIN_LAT> <MAX_LONG> <MAX_LAT> <RESOLUTION>` or just `objdem default` for a demo example.
