@@ -1,20 +1,8 @@
 #!/usr/bin/env python
 
 import sys, os, array, numpy, math, utm
-
+from urllib.request import urlopen
 from scipy.spatial import Delaunay
-
-# this allows python 2.7 and 3.6 to both handle urlopen
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib import urlopen
-
-# this is in place so that FileNotFoundError is defined, IOError is there in case other systems have this error
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
 
 # the database
 worldwind = 'https://data.worldwind.arc.nasa.gov'
@@ -51,7 +39,7 @@ def fetch_elevation_data(min_long, min_lat, max_long, max_lat, resolution):
                  '&version=1.3.0')
 
     f = open('data.bil', 'wb')
-    bytes_written = f.write(res.read())
+    f.write(res.read())
     f.close()
 
     # Read from file
@@ -105,7 +93,7 @@ def fetch_image_data(min_long, min_lat, max_long, max_lat, resolution):
                  '&version=1.3.0')
 
     f = open('map.tiff', 'wb')
-    bytes_written = f.write(res.read())
+    f.write(res.read())
     f.close()
 
 
@@ -147,7 +135,7 @@ def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
     try:
         os.remove("dem.obj")
         f = open("dem.obj", 'a')
-    except (FileNotFoundError, OSError) as e:
+    except FileNotFoundError:
         f = open("dem.obj", 'a')
 
     points = elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution)
