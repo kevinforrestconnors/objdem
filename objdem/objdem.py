@@ -140,19 +140,29 @@ def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
 
     points = elevation_points_to_xyz(min_long, min_lat, max_long, max_lat, resolution)
 
+    # write vertices
     for point in points:
         f.write("v " + str(point[0]) + " " + str(point[1]) + " " + str(point[2]) + '\n')
 
+    # writes vertex textures for uv mapping
+    height = len(elevation_data)
+    width = len(elevation_data[0])
+
+    for i in range(0, height):
+        for j in range(0, width):
+            f.write("vt " + str(j / width) + " " + str(height - (i / height)) + ' 0\n')
+
     xy_points = numpy.array(list(map(lambda x: [x[0], x[1]], points)))
 
-    delauny = Delaunay(xy_points)
+    tris = Delaunay(xy_points)
 
     a = len(points) - 1
     b = len(points) - 2
     c = len(points) - 3
     d = len(points) - 4
 
-    for simplex in delauny.simplices:
+    # write facets
+    for simplex in tris.simplices:
         # don't compute for (0,0) or (width,height)
         if (simplex[0] != a and
                     simplex[1] != a and
@@ -166,7 +176,9 @@ def write_points_to_obj(min_long, min_lat, max_long, max_lat, resolution):
                     simplex[0] != d and
                     simplex[1] != d and
                     simplex[2] != d):
-            f.write("f " + str(simplex[0] + 1) + " " + str(simplex[1] + 1) + " " + str(simplex[2] + 1) + '\n')
+            f.write("f " + str(simplex[0] + 1) + "/" + str(simplex[0] + 1) + " "
+                         + str(simplex[1] + 1) + "/" + str(simplex[1] + 1) + " "
+                         + str(simplex[2] + 1) + "/" + str(simplex[2] + 1) + '\n')
 
     f.close()
 
