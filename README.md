@@ -3,8 +3,6 @@
 objdem is a command-line tool that creates digital elevation model .obj files from specified long-lat coordinates.
 objdem also creates an associated .tiff file to be used as a texture.
 
-Currently, no `.mtl` file is created.  In the future, this is planned.
-
 objdem uses elevation and landsat data from `https://data.worldwind.arc.nasa.gov`.
 
 ## Installation
