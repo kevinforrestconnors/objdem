@@ -194,8 +194,8 @@ def main():
         model_filename = "dem.obj"
         image_filename = "map.tiff"
     elif len(sys.argv) != 6 or len(sys.argv) != 8:
-        print("Invalid number of arguments.  Usage: python objDEM.py min_long min_lat max_long max_lat resolution")
-        print("Or python objDEM.py min_long min_lat max_long max_lat resolution model_filename image_filename")
+        print("Invalid number of arguments.  Usage: python objdem.py min_long min_lat max_long max_lat resolution")
+        print("Or python objdem.py min_long min_lat max_long max_lat resolution model_filename image_filename")
         return
     else:
         min_long = float(sys.argv[1])
